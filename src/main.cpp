@@ -171,6 +171,7 @@ int main(int argc, char* argv[]){
 
 			so->rotateY(so->angVelocityRotation * deltaTime);
 			so->orbitY(so->angVelocityOrbit * deltaTime);
+			so->trace.push_back({so->posX, so->posY, so->posZ});
 
 			if(parser.flags.isCamDecoy){
 

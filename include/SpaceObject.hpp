@@ -60,6 +60,7 @@ class SpaceObject{
 	double posX, posY, posZ;
 
 	std::vector<point3D> points;
+	std::vector<point3D> trace;
 
 	double velocity;
 	double angVelocityOrbit;

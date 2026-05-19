@@ -248,6 +248,12 @@ void SpaceObject::calcObjRes(Camera &_cam){
 
 void SpaceObject::project(Camera &_cam){
 
+	//draw trace
+	for(int i = 0; i < trace.size(); i++){
+
+		trace[i].project(_cam, 0, 0, 0);
+	}
+
 	for(int i = 0; i < points.size(); i++){
 
 		points[i].project(_cam, posX, posY, posZ);
@@ -325,6 +331,13 @@ void SpaceObject::project(Camera &_cam, Camera &_decoy){
 
 void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, bool renderLabels, Camera &_cam){
 
+	//draw trace
+	for(int i = 0; i < trace.size() - 1; i++){
+
+		SDL_RenderDrawLine(renderer, trace[i].screenX, trace[i].screenY, trace[i + 1].screenX, trace[i + 1].screenY);
+		trace[i].y += 2;
+	}
+
 	int pSize = points.size();
 	
 	for(int i = 0; i < objectRes; i++){
@@ -369,8 +382,12 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 		int txtW;
 		TTF_SizeText(_txtRenderer->font, name.c_str(), &txtW, nullptr);
 		SDL_RenderDrawLine(renderer, center.screenX, center.screenY, center.screenX, center.screenY + screenR + 25);
+		//render names
 		//_txtRenderer->renderText(center.screenX - txtW / 2, center.screenY + screenR - 25, name, {255, 255, 255}); // TEMPORARELY REPLACED THIS WITH THE ONE BELOW
-		_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY + screenR - 25, "", rotation, {255, 255, 255});
+		//render rotation in radians
+		//_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY + screenR - 25, "", rotation, {255, 255, 255});
+		//render resolution
+		//_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY + screenR - 25, "", objectRes, {255, 255, 255});
 	}
 }
 
