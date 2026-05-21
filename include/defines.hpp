@@ -1,8 +1,8 @@
 #pragma once
 
 #define DEFAULTFOV 550
-#define SPEED 3
-#define FOVSPEED 60
+#define SPEED 300
+#define FOVSPEED 600
 #define CAMSPEED 2
 #define MOUSESENS 1
 #define MINFOV 50
@@ -13,4 +13,5 @@
 #define TINYSIZE 6
 #define MAXRES 40
 #define FRAMECAP 60.0
-
+#define TRACEUPDATERATE 5
+#define MAXTRACESIZE 100000

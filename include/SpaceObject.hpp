@@ -2,6 +2,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
+#include <map>
+#include <cmath>
+#include <list>
 
 #include "Renderer.hpp"
 
@@ -12,9 +15,15 @@ class SpaceObject;
 
 const double PI = M_PI;
 const double HALF_PI = M_PI / 2;
+const double GKM = 6.6743e-20;
 double map(double value, double f1, double l1, double f2, double l2);
 
 class Camera;
+
+struct vector3D{
+
+	double x, y, z;
+};
 
 //position
 struct point3D{
@@ -60,10 +69,18 @@ class SpaceObject{
 	double posX, posY, posZ;
 
 	std::vector<point3D> points;
-	std::vector<point3D> trace;
+	std::list<point3D> trace;
 
-	double velocity;
-	double angVelocityOrbit;
+	struct {
+
+		double x, y, z;
+	} velocity;
+	
+	struct {
+
+		double x, y, z;
+	} acceleration;
+
 	double angVelocityRotation;
 
 	double mass;
@@ -72,9 +89,10 @@ class SpaceObject{
 
 	double rotation;
 
+	int renderCycles;
 	int objectRes;
 
-	SpaceObject(std::string _name, double _x, double _y, double _z, double _mass, double _radius, double angVelocityOrbit, double angVelocityRotation);
+	SpaceObject(std::string _name, double _x, double _y, double _z, double _mass, double _radius, vector3D initVelocity, double _angVelocityRotation);
 
 	void calcObjRes(Camera &_cam);
 	void plot();
@@ -89,6 +107,11 @@ class SpaceObject{
 	void rotateX(double theta);
 	void rotateY(double theta);
 	void rotateZ(double theta);
+
+	void calculateForces(const std::map<std::string, SpaceObject> &astros);
+
+	void updateVelocity(double deltaT);
+	void updatePosition(double deltaT);
 
 	void orbitX(double theta);
 	void orbitY(double theta);

@@ -82,7 +82,7 @@ void handleInput(SDL_Event* _events, const Uint8* _kbstate, Camera &_cam, float 
 	//increase speed
 	if(_kbstate[SDL_SCANCODE_LSHIFT]){
 
-		SPEEDVAR *= 8;
+		SPEEDVAR *= 300;
 	}
 
 	//_camera Z

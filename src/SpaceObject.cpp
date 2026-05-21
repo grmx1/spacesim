@@ -10,13 +10,22 @@ double map(double value, double f1, double l1, double f2, double l2){
 
 void point3D::project(Camera &_cam, double _posX, double _posY, double _posZ){
 
-	double relPosX = x + _posX - _cam.posX;
-	double relPosY = y + _posY - _cam.posY;
-	double relPosZ = z + _posZ - _cam.posZ; 
+	//TODO MODIFY THIS REMOVE THE 1000
+	double relPosX = x + _posX - _cam.posX * 500;
+	double relPosY = y + _posY - _cam.posY * 500;
+	double relPosZ = z + _posZ - _cam.posZ * 500; 
 	
 	_cam.worldCameraTransform(relPosX, relPosY, relPosZ);
 
-	if(relPosZ < 0.1) relPosZ = 0.1;
+	if(relPosZ < 0.1){
+
+		relPosZ = 0.1;
+		onScreen = false;
+	}
+	else{
+		onScreen = true;
+	}
+
 	double zConversion = _cam.fov / relPosZ;
 
 	screenX = relPosX * zConversion + (RES[0] / 2);
@@ -48,6 +57,64 @@ void point3D::rotateZ(double cosT, double sinT){
 
 	x = rotX * cosT - rotY * sinT;
 	y = rotX * sinT + rotY * cosT;
+}
+
+void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astros){
+
+	double Fx = 0;
+	double Fy = 0;
+	double Fz = 0;
+
+	for(const auto astro : astros){
+
+		const SpaceObject &so = astro.second;
+
+		if(so.name == "Sun"){
+
+			if(so.name != name){
+
+				double xDist = so.posX - posX;
+				double yDist = so.posY - posY;
+				double zDist = so.posZ - posZ;
+
+				double totalDist = std::sqrt(std::pow(xDist, 2) + std::pow(yDist, 2) + std::pow(zDist, 2));
+
+				double unitVx = xDist / totalDist;
+				double unitVy = yDist / totalDist;
+				double unitVz = zDist / totalDist;
+
+				double halfGrav = (GKM* so.mass) / std::pow(totalDist, 2);
+
+				double localFx = halfGrav * unitVx;
+				double localFy = halfGrav * unitVy;
+				double localFz = halfGrav * unitVz;
+
+				//double totalAcc = std::sqrt(std::pow(localFx, 2) + std::pow(localFy, 2) + std::pow(localFz, 2));
+
+				Fx += localFx;
+				Fy += localFy;
+				Fz += localFz;
+			}
+		}
+	}
+
+	acceleration.x = Fx;
+	acceleration.y = Fy;
+	acceleration.z = Fz;
+}
+
+void SpaceObject::updateVelocity(double deltaT){
+	
+	velocity.x += acceleration.x * deltaT * 10000;
+	velocity.y += acceleration.y * deltaT * 10000;
+	velocity.z += acceleration.z * deltaT * 10000;
+}
+
+void SpaceObject::updatePosition(double deltaT){
+
+	posX += velocity.x * deltaT * 10000;
+	posY += velocity.y * deltaT * 10000;
+	posZ += velocity.z * deltaT * 10000;
 }
 
 void SpaceObject::orbitX(double theta){
@@ -249,9 +316,14 @@ void SpaceObject::calcObjRes(Camera &_cam){
 void SpaceObject::project(Camera &_cam){
 
 	//draw trace
-	for(int i = 0; i < trace.size(); i++){
+	if(!trace.empty()){
+	
+		std::list<point3D>::iterator it;
 
-		trace[i].project(_cam, 0, 0, 0);
+		for(it = trace.begin(); it != trace.end(); it++){
+
+			it->project(_cam, 0, 0, 0);
+		}
 	}
 
 	for(int i = 0; i < points.size(); i++){
@@ -332,10 +404,21 @@ void SpaceObject::project(Camera &_cam, Camera &_decoy){
 void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, bool renderLabels, Camera &_cam){
 
 	//draw trace
-	for(int i = 0; i < trace.size() - 1; i++){
+	if(!trace.empty()){
+	
+		std::list<point3D>::iterator it;
 
-		SDL_RenderDrawLine(renderer, trace[i].screenX, trace[i].screenY, trace[i + 1].screenX, trace[i + 1].screenY);
-		trace[i].y += 2;
+		for(it = trace.begin(); std::next(it) != trace.end(); it++){
+
+			std::list<point3D>::iterator next = std::next(it);
+
+			if(it->onScreen && next->onScreen){
+
+				//SDL_RenderDrawPoint(renderer, trace[i].screenX, trace[i].screenY);
+				SDL_RenderDrawLine(renderer, it->screenX, it->screenY, next->screenX, next->screenY);
+			}
+			it->z += 500000;
+		}
 	}
 
 	int pSize = points.size();
@@ -360,7 +443,6 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 				SDL_RenderDrawLine(renderer, points[idx].screenX, points[idx].screenY, points[eq_nxl].screenX, points[eq_nxl].screenY);
 				SDL_RenderDrawLine(renderer, points[eq_nxl].screenX, points[eq_nxl].screenY, points[nx].screenX, points[nx].screenY);
 			}
-
 		}
 	}
 
@@ -381,9 +463,9 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 	
 		int txtW;
 		TTF_SizeText(_txtRenderer->font, name.c_str(), &txtW, nullptr);
-		SDL_RenderDrawLine(renderer, center.screenX, center.screenY, center.screenX, center.screenY + screenR + 25);
+		//SDL_RenderDrawLine(renderer, center.screenX, center.screenY, center.screenX, center.screenY + screenR + 25);
 		//render names
-		//_txtRenderer->renderText(center.screenX - txtW / 2, center.screenY + screenR - 25, name, {255, 255, 255}); // TEMPORARELY REPLACED THIS WITH THE ONE BELOW
+		_txtRenderer->renderText(center.screenX - txtW / 2, center.screenY /*+ screenR*/ - 25, name, {255, 255, 255}); // TEMPORARELY REPLACED THIS WITH THE ONE BELOW
 		//render rotation in radians
 		//_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY + screenR - 25, "", rotation, {255, 255, 255});
 		//render resolution
@@ -430,7 +512,7 @@ void SpaceObject::projectRenderPts(SDL_Renderer* renderer, Camera &_cam){
 	}
 }
 
-SpaceObject::SpaceObject(std::string _name, double _x, double _y, double _z, double _mass, double _radius, double _angVelocityOrbit, double _angVelocityRotation){
+SpaceObject::SpaceObject(std::string _name, double _x, double _y, double _z, double _mass, double _radius, vector3D initVelocity, double _angVelocityRotation){
 
 	name = _name;
 
@@ -443,14 +525,16 @@ SpaceObject::SpaceObject(std::string _name, double _x, double _y, double _z, dou
 
 	rotation = 0;
 
-	angVelocityOrbit = _angVelocityOrbit;
+	velocity.x = initVelocity.x;
+	velocity.y = initVelocity.y;
+	velocity.z = initVelocity.z;
+
 	angVelocityRotation = _angVelocityRotation;
 
+	renderCycles = 0;
 	objectRes = 20;
 
 	plot();
-
-	
 }
 
 
