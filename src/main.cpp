@@ -79,9 +79,6 @@ int main(int argc, char* argv[]){
 	astros.try_emplace("Uranus",     "Uranus",    1.406265257214856E+09,    2.549899181965824E+09,   -8.764036768092990E+06, 8.681e25, 2.536e4,  vector3D{-6.024687174531799E+00, 2.968845814764818E+00, 8.943727988440786E-02}, 1010.0e-3);
 	astros.try_emplace("Neptune",    "Neptune",   4.466629254293965E+09,    1.432568203818374E+08,   -1.058809943827548E+08, 1.024e26, 2.462e4,  vector3D{-2.198959283463029E-01, 5.462561967464699E+00, -1.076599005970522E-01}, 1080.0e-3);
 	
-	//gigantic thing for testng
-	//astros.try_emplace("AAA", "AAA", 1000.00, 0.00, 0.00, 1.00, 500.00, 10.06e-3, 708.8e-3);
-
 	if(parser.flags.isCamDecoy){
 
 		//we set the first cam as decoy on the origin

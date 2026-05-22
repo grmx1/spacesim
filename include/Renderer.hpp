@@ -8,7 +8,7 @@
 
 #include "defines.hpp"
 
-inline int RES[2] = {2560,1440};
+inline int RES[2] = {1280,960};
 inline double centerX = RES[0] / 2;
 inline double centerY = RES[1] / 2;
 

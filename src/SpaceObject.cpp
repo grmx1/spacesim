@@ -69,32 +69,30 @@ void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astr
 
 		const SpaceObject &so = astro.second;
 
-		if(so.name == "Sun"){
 
-			if(so.name != name){
+		if(so.name != name){
 
-				double xDist = so.posX - posX;
-				double yDist = so.posY - posY;
-				double zDist = so.posZ - posZ;
+			double xDist = so.posX - posX;
+			double yDist = so.posY - posY;
+			double zDist = so.posZ - posZ;
 
-				double totalDist = std::sqrt(std::pow(xDist, 2) + std::pow(yDist, 2) + std::pow(zDist, 2));
+			double totalDist = std::sqrt(std::pow(xDist, 2) + std::pow(yDist, 2) + std::pow(zDist, 2));
 
-				double unitVx = xDist / totalDist;
-				double unitVy = yDist / totalDist;
-				double unitVz = zDist / totalDist;
+			double unitVx = xDist / totalDist;
+			double unitVy = yDist / totalDist;
+			double unitVz = zDist / totalDist;
 
-				double halfGrav = (GKM* so.mass) / std::pow(totalDist, 2);
+			double halfGrav = (GKM* so.mass) / std::pow(totalDist, 2);
 
-				double localFx = halfGrav * unitVx;
-				double localFy = halfGrav * unitVy;
-				double localFz = halfGrav * unitVz;
+			double localFx = halfGrav * unitVx;
+			double localFy = halfGrav * unitVy;
+			double localFz = halfGrav * unitVz;
 
-				//double totalAcc = std::sqrt(std::pow(localFx, 2) + std::pow(localFy, 2) + std::pow(localFz, 2));
+			//double totalAcc = std::sqrt(std::pow(localFx, 2) + std::pow(localFy, 2) + std::pow(localFz, 2));
 
-				Fx += localFx;
-				Fy += localFy;
-				Fz += localFz;
-			}
+			Fx += localFx;
+			Fy += localFy;
+			Fz += localFz;
 		}
 	}
 
