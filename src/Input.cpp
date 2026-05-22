@@ -5,6 +5,8 @@ Parser::Parser(int argc, char* argv[]){
 	flags.isCamDecoy = false;
 	flags.mouseDisabled = false;
 	flags.renderLabels = false;
+	flags.lock = false;
+	flags.lockname = "";
 
 	char* wrongArgs[16];
 	int waSize = 0;
@@ -22,6 +24,14 @@ Parser::Parser(int argc, char* argv[]){
 		else if(!strcmp(argv[i], "--labels")){
 
 			flags.renderLabels = true;
+		}
+		else if(!strcmp(argv[i], "--lock")){
+
+			if(i + 1 < argc){
+
+				flags.lock = true;
+				flags.lockname = argv[++i];
+			}
 		}
 		else{
 			wrongArgs[waSize++] = argv[i];

@@ -1,8 +1,8 @@
 #pragma once
 
 #define DEFAULTFOV 550
-#define SPEED 35
-#define SPEEDSHIFTMOD 20
+#define SPEED 100
+#define SPEEDSHIFTMOD 700
 #define FOVSPEED 400
 #define CAMSPEED 2
 #define MOUSESENS 1

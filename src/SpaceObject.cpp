@@ -10,10 +10,9 @@ double map(double value, double f1, double l1, double f2, double l2){
 
 void point3D::project(Camera &_cam, double _posX, double _posY, double _posZ){
 
-	//TODO MODIFY THIS REMOVE THE 1000
-	double relPosX = x + _posX - _cam.posX * 500;
-	double relPosY = y + _posY - _cam.posY * 500;
-	double relPosZ = z + _posZ - _cam.posZ * 500; 
+	double relPosX = x + _posX - _cam.posX;
+	double relPosY = y + _posY - _cam.posY;
+	double relPosZ = z + _posZ - _cam.posZ; 
 	
 	_cam.worldCameraTransform(relPosX, relPosY, relPosZ);
 
@@ -194,6 +193,13 @@ Camera::Camera(double _posX, double _posY, double _posZ, double _fov, double _ti
 	tiltZ = _tiltZ;
 }
 
+void Camera::lockToSO(SpaceObject &so){
+
+	posX = so.posX - so.radius * 2;
+	posY = so.posY;
+	posZ = so.posZ;
+}
+
 void Camera::moveX(double speed, float deltaT){
 
 	speed = speed * deltaT;
@@ -256,7 +262,8 @@ void SpaceObject::calcObjRes(Camera &_cam){
 	//basically it reaches the lowest amount of detail way to fast
 	double objCamDistance = std::sqrt((dx*dx) + (dy*dy) + (dz*dz));
 
-	double screenR = (radius * _cam.fov) / (objCamDistance + 1.0);
+	double screenR = radius * 800 / (objCamDistance + 1.0);
+	//double screenR = (radius * _cam.fov) / (objCamDistance + 1.0);
 
 	if(screenR > TINYSIZE){
 
@@ -356,6 +363,7 @@ void SpaceObject::project(Camera &_cam){
 		plot();
 	}
 }
+
 
 //this is an overload of project meant to take in a decoy camera
 //that will set the points to not be rendered as if that was the main camera
@@ -497,7 +505,7 @@ void SpaceObject::plot(){
 		}
 	}
 
-	rotateY(rotation);
+	rotateZ(rotation);
 }
 
 //this is meant for decoy and debugging

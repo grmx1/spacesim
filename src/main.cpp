@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
 	hud.stats.push_back({"fps", &fps});
 
 	std::map<std::string, SpaceObject> astros;
-	
+
 	//im using Horizon System to manually insert the information
 	//Time Specification: Start=2026-05-20 TDB , Stop=2026-06-19, Step=1 (days)
 	//                               |name       |x                        |y                       |z                      |mass     |radius   |velocity                                                                       |rotationAngVel 
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]){
 	astros.try_emplace("Saturn",     "Saturn",    1.407927996180217E+09,    1.539996392108606E+08,   -5.872595060292597E+07, 5.683e26, 5.823e4,  vector3D{-1.589394387680512E+00, 9.579859441017856E+00, -1.038774658231327E-01}, 1630.0e-3);
 	astros.try_emplace("Uranus",     "Uranus",    1.406265257214856E+09,    2.549899181965824E+09,   -8.764036768092990E+06, 8.681e25, 2.536e4,  vector3D{-6.024687174531799E+00, 2.968845814764818E+00, 8.943727988440786E-02}, 1010.0e-3);
 	astros.try_emplace("Neptune",    "Neptune",   4.466629254293965E+09,    1.432568203818374E+08,   -1.058809943827548E+08, 1.024e26, 2.462e4,  vector3D{-2.198959283463029E-01, 5.462561967464699E+00, -1.076599005970522E-01}, 1080.0e-3);
-	
+
 	if(parser.flags.isCamDecoy){
 
 		//we set the first cam as decoy on the origin
@@ -153,35 +153,36 @@ int main(int argc, char* argv[]){
 
 			so->rotation = std::fmod(so->rotation + (so->angVelocityRotation * deltaTime), 2 * PI);
 
-			so->rotateY(so->angVelocityRotation * deltaTime);
-			
-
+			so->rotateZ(so->angVelocityRotation * deltaTime);
 		
 			so->calculateForces(astros);
 			so->updateVelocity(deltaTime);
 			so->updatePosition(deltaTime);
+
+			if(parser.flags.lock && astros.find(parser.flags.lockname) != astros.end()){
+
+				cameras[cidx].lockToSO(astros.at(parser.flags.lockname));
+			}
+
 			//so->orbitY(0.01 * deltaTime);
-			
 
 			//something wrong with the size check or the cycles check because when comparing it only shows like 2 traces otherwise it works fine
 
-			if(so->name != "Camera"){
+			
+			if(so->renderCycles >= TRACEUPDATERATE){
 
-				if(so->renderCycles >= TRACEUPDATERATE){
+				if(so->trace.size() > MAXTRACESIZE){
 
-					if(so->trace.size() > MAXTRACESIZE){
-
-						so->trace.pop_front();
-					}
-					so->trace.push_back({so->posX, so->posY, so->posZ});
-					so->renderCycles = 0;
+					so->trace.pop_front();
 				}
-				else{
-
-					so->renderCycles++;
-				}
-
+				so->trace.push_back({so->posX, so->posY, so->posZ});
+				so->renderCycles = 0;
 			}
+			else{
+
+				so->renderCycles++;
+			}
+			
 
 			if(parser.flags.isCamDecoy){
 

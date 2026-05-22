@@ -14,6 +14,8 @@ class Parser{
 		bool isCamDecoy;
 		bool mouseDisabled;
 		bool renderLabels;
+		bool lock;
+		std::string lockname;
 	} flags;
 
 	Parser(int argc, char* argv[]);
