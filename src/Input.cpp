@@ -7,6 +7,8 @@ Parser::Parser(int argc, char* argv[]){
 	flags.renderLabels = false;
 	flags.lock = false;
 	flags.lockname = "";
+	flags.traces = false;
+	flags.forwardTraces = false;
 
 	char* wrongArgs[16];
 	int waSize = 0;
@@ -32,6 +34,15 @@ Parser::Parser(int argc, char* argv[]){
 				flags.lock = true;
 				flags.lockname = argv[++i];
 			}
+		}
+		else if(!strcmp(argv[i], "--traces")){
+
+			flags.traces = true;
+		}
+
+		else if(!strcmp(argv[i], "--forward")){
+
+			flags.forwardTraces = true;
 		}
 		else{
 			wrongArgs[waSize++] = argv[i];

@@ -16,6 +16,8 @@ class Parser{
 		bool renderLabels;
 		bool lock;
 		std::string lockname;
+		bool traces;
+		bool forwardTraces;
 	} flags;
 
 	Parser(int argc, char* argv[]);

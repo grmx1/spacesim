@@ -195,7 +195,7 @@ Camera::Camera(double _posX, double _posY, double _posZ, double _fov, double _ti
 
 void Camera::lockToSO(SpaceObject &so){
 
-	posX = so.posX - so.radius * 2;
+	posX = so.posX + so.radius * 4;
 	posY = so.posY;
 	posZ = so.posZ;
 }
@@ -407,7 +407,7 @@ void SpaceObject::project(Camera &_cam, Camera &_decoy){
 	}
 }
 
-void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, bool renderLabels, Camera &_cam){
+void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, bool renderLabels, Camera &_cam, bool forward){
 
 	//draw trace
 	if(!trace.empty()){
@@ -423,7 +423,10 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 				//SDL_RenderDrawPoint(renderer, trace[i].screenX, trace[i].screenY);
 				SDL_RenderDrawLine(renderer, it->screenX, it->screenY, next->screenX, next->screenY);
 			}
-			it->z += 500000;
+			if(forward){
+
+				it->z += 500000;
+			}
 		}
 	}
 

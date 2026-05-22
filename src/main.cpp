@@ -168,21 +168,23 @@ int main(int argc, char* argv[]){
 
 			//something wrong with the size check or the cycles check because when comparing it only shows like 2 traces otherwise it works fine
 
-			
-			if(so->renderCycles >= TRACEUPDATERATE){
 
-				if(so->trace.size() > MAXTRACESIZE){
+			if(parser.flags.traces){
 
-					so->trace.pop_front();
+				if(so->renderCycles >= TRACEUPDATERATE){
+
+					if(so->trace.size() > MAXTRACESIZE){
+
+						so->trace.pop_front();
+					}
+					so->trace.push_back({so->posX, so->posY, so->posZ});
+					so->renderCycles = 0;
 				}
-				so->trace.push_back({so->posX, so->posY, so->posZ});
-				so->renderCycles = 0;
-			}
-			else{
+				else{
 
-				so->renderCycles++;
+					so->renderCycles++;
+				}
 			}
-			
 
 			if(parser.flags.isCamDecoy){
 
@@ -193,7 +195,7 @@ int main(int argc, char* argv[]){
 				so->project(cameras[cidx]);
 			}
 
-			so->render(renderer, txtRenderer, parser.flags.renderLabels, cameras[cidx]);
+			so->render(renderer, txtRenderer, parser.flags.renderLabels, cameras[cidx], parser.flags.forwardTraces);
 
 			if(parser.flags.isCamDecoy){
 

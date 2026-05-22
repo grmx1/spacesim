@@ -49,7 +49,7 @@ class Camera{
 	double posX, posY, posZ;
 	double tiltX, tiltY, tiltZ;
 
-	Camera(double _posX = 0, double _posY = 0, double _posZ = -200e6, double _fov = DEFAULTFOV, double _tiltX = 0, double _tiltY = 0, double _tiltZ = 0);
+	Camera(double _posX = 0, double _posY = 0, double _posZ = -500e6, double _fov = DEFAULTFOV, double _tiltX = 0, double _tiltY = 0, double _tiltZ = 0);
 
 	void lockToSO(SpaceObject &so);
 	void moveX(double speed, float deltaT);
@@ -99,7 +99,7 @@ class SpaceObject{
 	void plot();
 
 	//display
-	void render(SDL_Renderer* renderer, textRenderer* _txtRenderer, bool renderLabels, Camera &_cam);
+	void render(SDL_Renderer* renderer, textRenderer* _txtRenderer, bool renderLabels, Camera &_cam, bool forward = false);
 
 	void project(Camera &_cam);
 	void project(Camera &_cam, Camera &_decoy);
