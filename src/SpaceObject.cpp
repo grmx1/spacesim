@@ -286,7 +286,7 @@ void SpaceObject::calcObjRes(Camera &_cam){
 	//basically it reaches the lowest amount of detail way to fast
 	double objCamDistance = std::sqrt((dx*dx) + (dy*dy) + (dz*dz));
 
-	double screenR = radius * 800 / (objCamDistance + 1.0);
+	double screenR = radius * _cam.fov / (objCamDistance + 1.0);
 	//double screenR = (radius * _cam.fov) / (objCamDistance + 1.0);
 
 	if(screenR > TINYSIZE){
@@ -502,7 +502,7 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 		//render rotation in radians
 		//_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY + screenR - 25, "", rotation, {255, 255, 255});
 		//render resolution
-		//_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY + screenR - 25, "", objectRes, {255, 255, 255});
+		_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY - 25, "", objectRes, {255, 255, 255});
 	}
 }
 
