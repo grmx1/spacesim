@@ -38,6 +38,7 @@ struct point3D{
 	void rotateX(double cosT, double sinT);
 	void rotateY(double cosT, double sinT);
 	void rotateZ(double cosT, double sinT);
+
 };
 
 class Camera{
@@ -59,6 +60,17 @@ class Camera{
 	void worldCameraTransform(double &relX, double &relY, double &relZ);
 };
 
+class starsBackground{
+
+	public:
+
+	void generateStars();
+	void render(SDL_Renderer* renderer, const Camera &_cam);
+
+	private:
+
+	SDL_Point stars[1000];
+};
 
 //physical objects
 class SpaceObject{

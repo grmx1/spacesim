@@ -3,6 +3,7 @@
 #include <numbers>
 #include <string>
 #include <map>
+#include <cstdlib>
 #include <chrono>
 #include <thread> //for fps rating not multithreading
 
@@ -15,6 +16,7 @@ double radToDeg(double radians);
 
 int main(int argc, char* argv[]){
 
+	srand(time(0));
 	//parse arguments
 	Parser parser(argc, argv);
 
@@ -39,7 +41,6 @@ int main(int argc, char* argv[]){
 
         textRenderer* txtRenderer = new textRenderer(renderer, "../src/Hack-Regular.ttf", 20);
 
-
 	const std::chrono::duration<double> frameMaxExecTime(1.0 / FRAMECAP);
 	auto lastFrameTime = std::chrono::high_resolution_clock::now();
 	double deltaTime;
@@ -55,6 +56,9 @@ int main(int argc, char* argv[]){
 	int cidx = 0;
 
 	Hud hud;
+	starsBackground bg;
+
+	bg.generateStars();
 
 	hud.stats.push_back({"cam X", &cameras[cidx].posX});
 	hud.stats.push_back({"cam Y", &cameras[cidx].posY});
@@ -202,7 +206,8 @@ int main(int argc, char* argv[]){
 				so->projectRenderPts(renderer, cameras[cidx]);
 			}
 		}
-	
+
+		bg.render(renderer, cameras[cidx]);
 		hud.renderCrossHair(renderer);
 		hud.renderStats(txtRenderer);
 

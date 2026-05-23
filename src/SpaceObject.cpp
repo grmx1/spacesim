@@ -8,6 +8,7 @@ double map(double value, double f1, double l1, double f2, double l2){
 	return f2 + (l2 - f2) * ((value - f1) / (l1 - f1));
 }
 
+
 void point3D::project(Camera &_cam, double _posX, double _posY, double _posZ){
 
 	double relPosX = x + _posX - _cam.posX;
@@ -56,6 +57,29 @@ void point3D::rotateZ(double cosT, double sinT){
 
 	x = rotX * cosT - rotY * sinT;
 	y = rotX * sinT + rotY * cosT;
+}
+
+void starsBackground::generateStars(){
+	
+	srand(time(0));
+
+	for(int i = 0; i < sizeof(stars) / sizeof(SDL_Point); i++){
+
+		stars[i] = SDL_Point{rand() % RES[0], rand() % RES[1]};
+	}
+}
+
+void starsBackground::render(SDL_Renderer* renderer, const Camera &_cam){
+
+	double tiltSens = 700;
+
+	SDL_Point container;
+
+	for(auto star : stars){
+
+		//make the stars move with cam tilt and wrap around the screen coordinates
+		SDL_RenderDrawPoint(renderer, (static_cast<int>(star.x - _cam.tiltY * tiltSens) % RES[0] + RES[0]) % RES[0], (static_cast<int>(star.y + _cam.tiltX * tiltSens) % RES[1] + RES[1]) % RES[1]);
+	}
 }
 
 void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astros){
@@ -425,7 +449,7 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 			}
 			if(forward){
 
-				it->z += 500000;
+				it->z += 7000000;
 			}
 		}
 	}
