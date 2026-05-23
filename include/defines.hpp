@@ -1,5 +1,6 @@
 #pragma once
 
+#define TIMEMODIFIER 10000
 #define DEFAULTFOV 550
 #define SPEED 200//100
 #define SPEEDSHIFTMOD 1500

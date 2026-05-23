@@ -126,16 +126,16 @@ void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astr
 
 void SpaceObject::updateVelocity(double deltaT){
 	
-	velocity.x += acceleration.x * deltaT * 10000;
-	velocity.y += acceleration.y * deltaT * 10000;
-	velocity.z += acceleration.z * deltaT * 10000;
+	velocity.x += acceleration.x * deltaT * TIMEMODIFIER;
+	velocity.y += acceleration.y * deltaT * TIMEMODIFIER;
+	velocity.z += acceleration.z * deltaT * TIMEMODIFIER;
 }
 
 void SpaceObject::updatePosition(double deltaT){
 
-	posX += velocity.x * deltaT * 10000;
-	posY += velocity.y * deltaT * 10000;
-	posZ += velocity.z * deltaT * 10000;
+	posX += velocity.x * deltaT * TIMEMODIFIER;
+	posY += velocity.y * deltaT * TIMEMODIFIER;
+	posZ += velocity.z * deltaT * TIMEMODIFIER;
 }
 
 void SpaceObject::orbitX(double theta){
@@ -449,7 +449,7 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 			}
 			if(forward){
 
-				it->z += 7000000;
+				it->z += TIMEMODIFIER * 700;
 			}
 		}
 	}
@@ -502,7 +502,7 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 		//render rotation in radians
 		//_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY + screenR - 25, "", rotation, {255, 255, 255});
 		//render resolution
-		_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY - 25, "", objectRes, {255, 255, 255});
+		//_txtRenderer->renderVariable(center.screenX - txtW / 2, center.screenY - 25, "", objectRes, {255, 255, 255});
 	}
 }
 
