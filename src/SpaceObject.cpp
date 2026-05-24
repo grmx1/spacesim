@@ -20,10 +20,6 @@ void point3D::project(Camera &_cam, double _posX, double _posY, double _posZ){
 	if(relPosZ < 0.1){
 
 		relPosZ = 0.1;
-		onScreen = false;
-	}
-	else{
-		onScreen = true;
 	}
 
 	double zConversion = _cam.fov / relPosZ;
@@ -442,7 +438,8 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 
 			std::list<point3D>::iterator next = std::next(it);
 
-			if(it->onScreen && next->onScreen){
+			if((it->screenX > 0 && it->screenX < RES[0] && it->screenY > 0 && it->screenY < RES[1])
+				&& (next->screenX > 0 && next->screenX < RES[0] && next->screenY > 0 && next->screenY < RES[1])){
 
 				//SDL_RenderDrawPoint(renderer, trace[i].screenX, trace[i].screenY);
 				SDL_RenderDrawLine(renderer, it->screenX, it->screenY, next->screenX, next->screenY);

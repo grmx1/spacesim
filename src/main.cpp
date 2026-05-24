@@ -54,6 +54,7 @@ int main(int argc, char* argv[]){
 	cameras.push_back({});
 
 	int cidx = 0;
+	int decoyIdx = 1;
 
 	Hud hud;
 	starsBackground bg;
@@ -90,9 +91,10 @@ int main(int argc, char* argv[]){
 		//
 		//this will be handled better in a future not handing out
 		//hardcoded lvalues as indexes
-		cameras.push_back({});
-		cidx++;
-		astros.try_emplace("CAMERA", "CAMERA", -cameras[0].posX - 5, -cameras[0].posY, cameras[0].posZ, 0, 10, vector3D{0.0, 0.0, 0.0}, 0);
+		cameras.push_back({0, 0, -8e5, DEFAULTFOV, 0, 0, 0});
+		decoyIdx = cidx + 1;
+		//cidx++;
+		astros.try_emplace("CAMERA", "CAMERA", -cameras[decoyIdx].posX, -cameras[decoyIdx].posY, cameras[decoyIdx].posZ, 0, 10e3, vector3D{0.0, 0.0, 0.0}, 0);
 	}
 
 
@@ -143,7 +145,7 @@ int main(int argc, char* argv[]){
 
 			if(parser.flags.isCamDecoy){
 
-				so->calcObjRes(cameras[0]);
+				so->calcObjRes(cameras[decoyIdx]);
 			}
 			else{
 
@@ -157,12 +159,14 @@ int main(int argc, char* argv[]){
 
 			so->rotation = std::fmod(so->rotation + (so->angVelocityRotation * deltaTime), 2 * PI);
 
-			so->rotateZ(so->angVelocityRotation * deltaTime);
-		
-			so->calculateForces(astros);
-			so->updateVelocity(deltaTime);
-			so->updatePosition(deltaTime);
+			if(so->name != "CAMERA"){
 
+				so->rotateZ(so->angVelocityRotation * deltaTime);
+
+				so->calculateForces(astros);
+				so->updateVelocity(deltaTime);
+				so->updatePosition(deltaTime);
+			}
 			if(parser.flags.lock && astros.find(parser.flags.lockname) != astros.end()){
 
 				cameras[cidx].lockToSO(astros.at(parser.flags.lockname));
@@ -170,9 +174,7 @@ int main(int argc, char* argv[]){
 
 			//so->orbitY(0.01 * deltaTime);
 
-			//something wrong with the size check or the cycles check because when comparing it only shows like 2 traces otherwise it works fine
-
-
+			//for some reason when using decoy i see no traces ill have to look into it
 			if(parser.flags.traces){
 
 				if(so->renderCycles >= TRACEUPDATERATE){
@@ -192,7 +194,7 @@ int main(int argc, char* argv[]){
 
 			if(parser.flags.isCamDecoy){
 
-				so->project(cameras[cidx], cameras[0]);
+				so->project(cameras[cidx], cameras[decoyIdx]);
 			}
 			else{
 
