@@ -56,10 +56,10 @@ int main(int argc, char* argv[]){
 	int cidx = 0;
 	int decoyIdx = 1;
 
-	Hud hud;
 	starsBackground bg;
-
 	bg.generateStars();
+
+	Hud hud;
 
 	hud.stats.push_back({"cam X", &cameras[cidx].posX});
 	hud.stats.push_back({"cam Y", &cameras[cidx].posY});
@@ -68,6 +68,11 @@ int main(int argc, char* argv[]){
 	hud.stats.push_back({"tiltX", &cameras[cidx].tiltX});
 	hud.stats.push_back({"tiltY", &cameras[cidx].tiltY});
 	hud.stats.push_back({"fps", &fps});
+
+	std::vector<Menu*> menus;
+
+	MainMenu mmenu;
+	menus.push_back(&mmenu);
 
 	std::map<std::string, SpaceObject> astros;
 
@@ -129,12 +134,13 @@ int main(int argc, char* argv[]){
 		SDL_RenderClear(renderer);
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
+
 		if(kbstate[SDL_SCANCODE_ESCAPE]){
 
 			mainLoop = false;
 		}
 	
-		handleInput(&events, kbstate, cameras[cidx], deltaTime, parser.flags.mouseDisabled);
+		bg.render(renderer, cameras[cidx]);
 	
 		//space objects loop
 		for(auto &astro : astros){
@@ -209,12 +215,50 @@ int main(int argc, char* argv[]){
 			}
 		}
 
-		bg.render(renderer, cameras[cidx]);
+		static bool lastMouseState = !parser.flags.mouseDisabled;
+
+
+		handleKeyboardInput(&events, kbstate, cameras[cidx], deltaTime, parser.flags.mouseDisabled);
+		while(SDL_PollEvent(&events)){
+
+			handleMouseInput(&events, cameras[cidx], deltaTime, parser.flags.mouseDisabled, menus);
+		}
+
+		Uint32 flags = SDL_GetWindowFlags(window);
+
+		if(!parser.flags.mouseDisabled && lastMouseState == false){
+
+			if(SDL_SetRelativeMouseMode(SDL_TRUE) < 0){
+
+				std::cerr << "ERR: Could not capture mouse, use --nm to disable mouse support" << std::endl;
+				std::cerr << "error code: " << SDL_GetError() << std::endl;
+				return 1;
+			}
+
+			lastMouseState = true;
+
+		}
+		else if(parser.flags.mouseDisabled && lastMouseState == true){
+
+			if(SDL_SetRelativeMouseMode(SDL_FALSE) < 0){
+
+				std::cerr << "ERR: Could not disable mouse support" << std::endl;
+				std::cerr << "error code: " << SDL_GetError() << std::endl;
+				return 1;
+			}
+
+			lastMouseState = false;
+		}
+
+		if(mmenu.show){
+
+			mmenu.render(renderer, txtRenderer);
+		}
+
 		hud.renderCrossHair(renderer);
 		hud.renderStats(txtRenderer);
 
 		SDL_RenderPresent(renderer);
-
 
 		//last calculations for delta time
 		lastFrameTime = beginFrameTime;

@@ -8,7 +8,8 @@
 
 #include "defines.hpp"
 
-inline int RES[2] = {1280,960};
+inline int RES[2] = {1920,1080};
+//inline int RES[2] = {1280,960};
 //inline int RES[2] = {2560,1440};
 inline double centerX = RES[0] / 2;
 inline double centerY = RES[1] / 2;
@@ -55,8 +56,7 @@ class Hud{
 
 		for(int i = 0; i < stats.size(); i++){
 
-
-			_txtRenderer->renderVariable(10, i * 20 + 20, stats[i].first, *stats[i].second, {255, 255, 255});
+			_txtRenderer->renderVariable(RES[0] - 300, i * 20 + 20, stats[i].first, *stats[i].second, {255, 255, 255});
 		}
 	}
 

@@ -67,7 +67,7 @@ void starsBackground::generateStars(){
 
 void starsBackground::render(SDL_Renderer* renderer, const Camera &_cam){
 
-	double tiltSens = 700;
+	double tiltSens = 1100;
 
 	SDL_Point container;
 
@@ -446,7 +446,7 @@ void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, boo
 			}
 			if(forward){
 
-				it->z += TIMEMODIFIER * 700;
+				it->z += TIMEMODIFIER * 1000;
 			}
 		}
 	}
