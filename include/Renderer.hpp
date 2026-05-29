@@ -8,7 +8,7 @@
 
 #include "defines.hpp"
 
-inline int RES[2] = {1920,1080};
+inline int RES[2] = {1280, 900};
 //inline int RES[2] = {1280,960};
 //inline int RES[2] = {2560,1440};
 inline double centerX = RES[0] / 2;
@@ -25,10 +25,10 @@ class textRenderer{
 
         ~textRenderer();
 
-        void renderText(int x, int y, const std::string& text, SDL_Color color);
+        void renderText(int x, int y, const std::string &text, SDL_Color color);
 
 	template <typename T>
-	void renderVariable(int x, int y, const std::string& label, T value, SDL_Color color){
+	void renderVariable(int x, int y, const std::string &label, T value, SDL_Color color){
 
 		std::ostringstream oss;
 		oss << label << ": " << value;

@@ -51,7 +51,15 @@ int main(int argc, char* argv[]){
 	auto lastFpsUpdateTime = std::chrono::high_resolution_clock::now();
 
 	std::vector<Camera> cameras;
-	cameras.push_back({});
+
+	if(!parser.flags.forwardTraces){
+
+		cameras.push_back({0, 0, -1e9, DEFAULTFOV * 2, 0, 0, 0});
+	}
+	else{
+
+		cameras.push_back({});
+	}
 
 	int cidx = 0;
 	int decoyIdx = 1;
@@ -70,9 +78,7 @@ int main(int argc, char* argv[]){
 	hud.stats.push_back({"fps", &fps});
 
 	std::vector<Menu*> menus;
-
-	MainMenu mmenu;
-	menus.push_back(&mmenu);
+	std::vector<std::pair<std::string, double*>> vars;
 
 	std::map<std::string, SpaceObject> astros;
 
@@ -88,6 +94,16 @@ int main(int argc, char* argv[]){
 	astros.try_emplace("Saturn",     "Saturn",    1.407927996180217E+09,    1.539996392108606E+08,   -5.872595060292597E+07, 5.683e26, 5.823e4,  vector3D{-1.589394387680512E+00, 9.579859441017856E+00, -1.038774658231327E-01}, 1630.0e-3);
 	astros.try_emplace("Uranus",     "Uranus",    1.406265257214856E+09,    2.549899181965824E+09,   -8.764036768092990E+06, 8.681e25, 2.536e4,  vector3D{-6.024687174531799E+00, 2.968845814764818E+00, 8.943727988440786E-02}, 1010.0e-3);
 	astros.try_emplace("Neptune",    "Neptune",   4.466629254293965E+09,    1.432568203818374E+08,   -1.058809943827548E+08, 1.024e26, 2.462e4,  vector3D{-2.198959283463029E-01, 5.462561967464699E+00, -1.076599005970522E-01}, 1080.0e-3);
+
+
+	for(auto &astro : astros){
+
+		vars.push_back(std::pair<std::string, double*>(astro.second.name, &astro.second.mass));
+	}
+
+	MainMenu mmenu(vars);
+	menus.push_back(&mmenu);
+
 
 	if(parser.flags.isCamDecoy){
 
@@ -197,6 +213,10 @@ int main(int argc, char* argv[]){
 					so->renderCycles++;
 				}
 			}
+			else if(!so->trace.empty()){
+			
+				so->trace.clear();
+			}
 
 			if(parser.flags.isCamDecoy){
 
@@ -218,7 +238,7 @@ int main(int argc, char* argv[]){
 		static bool lastMouseState = !parser.flags.mouseDisabled;
 
 
-		handleKeyboardInput(&events, kbstate, cameras[cidx], deltaTime, parser.flags.mouseDisabled);
+		handleKeyboardInput(&events, kbstate, cameras[cidx], deltaTime, parser.flags.mouseDisabled, menus);
 		while(SDL_PollEvent(&events)){
 
 			handleMouseInput(&events, cameras[cidx], deltaTime, parser.flags.mouseDisabled, menus);

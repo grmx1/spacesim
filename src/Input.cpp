@@ -60,16 +60,11 @@ Parser::Parser(int argc, char* argv[]){
 void Menu::Button::click(){
 
 	clicked = !clicked;
+	if(nmi){
+
+		nmi->selected = !nmi->selected;
+	}
 };
-
-Menu::Button::Button(int _ID, int _x, int _y, int _w, int _h, std::string _displayName, bool _clicked) 
-	: ID(_ID), x(_x), y(_y), w(_w), h(_h), displayName(_displayName), clicked(_clicked){
-
-	body.x = _x;
-	body.y = _y;
-	body.w = _w;
-	body.h = _h;
-}
 
 int Menu::Button::mouseOnButton(Sint32 mouseX, Sint32 mouseY){
 
@@ -79,6 +74,203 @@ int Menu::Button::mouseOnButton(Sint32 mouseX, Sint32 mouseY){
 	}
 
 	return 0;
+}
+
+Menu::Button::Button(int _ID, int _x, int _y, int _w, int _h, std::string _displayName, bool _clicked, double* numInVar) 
+	: ID(_ID), x(_x), y(_y), w(_w), h(_h), displayName(_displayName), clicked(_clicked){
+
+	body.x = _x;
+	body.y = _y;
+	body.w = _w;
+	body.h = _h;
+
+	if(numInVar){
+
+		nmi = std::make_unique<numericInput>(numInVar, _x + _w + 5, _y, 250, h);
+	}
+	else{
+		nmi = nullptr;
+	}
+}
+
+Menu::numericInput::numericInput(double* _var, int _x, int _y, int _w, int _h) 
+	: var(_var), x(_x), y(_y), w(_w), h(_h), buffer{/*zinit*/}, bufferIdx(0), selected(false) {
+
+	body.x = _x;
+	body.y = _y;
+	body.w = _w;
+	body.h = _h;
+}
+
+void Menu::numericInput::parseInput(){
+
+	int numsize = std::strlen(buffer);
+
+	int c = -1;
+	double parsedValue = 0;
+	int val_multiplier = 0;
+	double e_multiplier = 0;
+
+	//for(int i = 0; i < numsize; i++){
+	//for(int i = 0; i < sizeof(buffer) && c != 0; i++){
+	for(int i = numsize - 1; i >= 0; i--){
+
+		c = buffer[i];
+
+		if(c == 'e'){
+
+			e_multiplier = parsedValue;
+			parsedValue = 0;
+			val_multiplier = 0;
+		}
+		else{
+			parsedValue += (c - 48) * std::pow(10, val_multiplier++);
+		}
+	}
+
+	parsedValue = parsedValue * std::pow(10, e_multiplier);
+	*var = parsedValue;
+}
+
+int Menu::numericInput::readInput(SDL_Event* _events, const Uint8* _kbstate){
+
+	static int lastKeyPressed = 0;
+	static bool lastKeyReleased = true;
+	static bool used_e = false;
+
+	if(lastKeyReleased == false){
+
+		if(_kbstate[lastKeyPressed] == 0){
+
+			lastKeyReleased = true;
+		}
+		else{
+			return 1;
+		}
+	}
+
+	if(_kbstate[SDL_SCANCODE_RETURN]){
+
+		return 0;
+	}
+	if(_kbstate[SDL_SCANCODE_BACKSPACE]){
+
+		if(bufferIdx > 0){
+
+			if(buffer[bufferIdx - 1] == 'e'){
+
+				used_e = false;
+			}
+
+			buffer[--bufferIdx] = '\0';
+			lastKeyPressed = SDL_SCANCODE_BACKSPACE;
+			lastKeyReleased = false;
+		}
+	}
+
+	if(bufferIdx >= sizeof(buffer) - 2){
+
+		return 1;
+	}
+
+	if(_kbstate[SDL_SCANCODE_E] && !used_e){
+
+		buffer[bufferIdx++] = 'e';
+		buffer[bufferIdx] = '\0';
+
+		used_e = true;
+		lastKeyPressed = SDL_SCANCODE_E;
+		lastKeyReleased = false;
+
+	}
+	if(_kbstate[SDL_SCANCODE_1]){
+
+		buffer[bufferIdx++] = '1';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_1;
+		lastKeyReleased = false;
+	}
+	if(_kbstate[SDL_SCANCODE_2]){
+
+		buffer[bufferIdx++] = '2';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_2;
+		lastKeyReleased = false;
+
+	}
+	if(_kbstate[SDL_SCANCODE_3]){
+
+		buffer[bufferIdx++] = '3';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_3;
+		lastKeyReleased = false;
+
+	}
+	if(_kbstate[SDL_SCANCODE_4]){
+
+		buffer[bufferIdx++] = '4';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_4;
+		lastKeyReleased = false;
+
+	}
+	if(_kbstate[SDL_SCANCODE_5]){
+
+		buffer[bufferIdx++] = '5';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_5;
+		lastKeyReleased = false;
+
+	}
+	if(_kbstate[SDL_SCANCODE_6]){
+
+		buffer[bufferIdx++] = '6';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_6;
+		lastKeyReleased = false;
+	}
+	if(_kbstate[SDL_SCANCODE_7]){
+
+		buffer[bufferIdx++] = '7';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_7;
+		lastKeyReleased = false;
+	}
+	if(_kbstate[SDL_SCANCODE_8]){
+
+		buffer[bufferIdx++] = '8';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_8;
+		lastKeyReleased = false;
+	}
+	if(_kbstate[SDL_SCANCODE_9]){
+
+		buffer[bufferIdx++] = '9';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_9;
+		lastKeyReleased = false;
+
+	}
+	if(_kbstate[SDL_SCANCODE_0]){
+
+		buffer[bufferIdx++] = '0';
+		buffer[bufferIdx] = '\0';
+
+		lastKeyPressed = SDL_SCANCODE_0;
+		lastKeyReleased = false;
+	}
+
+
+	return 1;
 }
 
 void Menu::render(SDL_Renderer* renderer, textRenderer* txtRenderer){
@@ -103,6 +295,18 @@ void Menu::render(SDL_Renderer* renderer, textRenderer* txtRenderer){
 		if(bt.clicked){
 
 			textColor = {0, 255, 0, 255};
+
+			if(bt.nmi){
+
+				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+				SDL_RenderFillRect(renderer, &bt.nmi->body);
+
+				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+				SDL_RenderDrawRect(renderer, &bt.nmi->body);
+
+				txtRenderer->renderText(bt.nmi->x, bt.nmi->y + (bt.nmi->h / 2), bt.nmi->buffer, {255, 255, 255});
+			}
+
 		}
 		else{
 			textColor = {255, 0, 0, 255};
@@ -114,13 +318,21 @@ void Menu::render(SDL_Renderer* renderer, textRenderer* txtRenderer){
 	SDL_SetRenderDrawColor(renderer, oldR, oldG, oldB, oldA);
 }
 
-MainMenu::MainMenu(){
+MainMenu::MainMenu(std::vector<std::pair<std::string, double*>> vars){
 
 	show = false;
 
-	buttons.emplace_back(1, 10, 50, 150, 100, "Test1");
-	buttons.emplace_back(2, 10, 200, 150, 100, "Test2");
-	buttons.emplace_back(3, 10, 350, 150, 100, "Test3");
+	int x = 10;
+	int w = 100;
+	int h = 50;
+	int step = 25;
+	int stepAcc = step;
+
+	for(int i = 0; i < vars.size(); i++){
+
+		buttons.emplace_back(i, x, stepAcc, w, h, vars[i].first, false, vars[i].second);
+		stepAcc += step + h;
+	}
 };
 
 void handleMouseInput(SDL_Event* _events, Camera &_cam, float deltaTime, bool mouseDisabled, std::vector<Menu*> &menus){
@@ -192,7 +404,7 @@ void handleMouseInput(SDL_Event* _events, Camera &_cam, float deltaTime, bool mo
 	}
 }
 
-void handleKeyboardInput(SDL_Event* _events, const Uint8* _kbstate, Camera &_cam, float deltaTime, bool &mouseDisabled){
+void handleKeyboardInput(SDL_Event* _events, const Uint8* _kbstate, Camera &_cam, float deltaTime, bool &mouseDisabled, std::vector<Menu*> &menus){
 
 	int SPEEDVAR = SPEED;
 
@@ -211,73 +423,95 @@ void handleKeyboardInput(SDL_Event* _events, const Uint8* _kbstate, Camera &_cam
 	}
 
 
+	if(Menu::show){
 
-	//increase speed
-	if(_kbstate[SDL_SCANCODE_LSHIFT]){
+		for(auto &menu : menus){
 
-		SPEEDVAR *= SPEEDSHIFTMOD;
+			for(auto &bt : menu->buttons){
+
+				if(bt.nmi && bt.nmi->selected){
+
+					if(bt.nmi->readInput(_events, _kbstate) == 0){
+
+						//fetch the buffer here dont forget
+
+						bt.nmi->parseInput();
+						bt.nmi->selected = false;
+						bt.clicked = false;
+					}
+				}
+			}
+		}
 	}
+	else{
 
-	//_camera Z
-	if(_kbstate[SDL_SCANCODE_W]){
+		//increase speed
+		if(_kbstate[SDL_SCANCODE_LSHIFT]){
 
-		_cam.moveZ(SPEEDVAR, deltaTime); // negative due to inverted Y in SDL
-	}
-	if(_kbstate[SDL_SCANCODE_S]){
+			SPEEDVAR *= SPEEDSHIFTMOD;
+		}
 
-		_cam.moveZ(-SPEEDVAR, deltaTime);
-	}
+		//_camera Z
+		if(_kbstate[SDL_SCANCODE_W]){
 
-	//_camera X
-	if(_kbstate[SDL_SCANCODE_A]){
+			_cam.moveZ(SPEEDVAR, deltaTime); // negative due to inverted Y in SDL
+		}
+		if(_kbstate[SDL_SCANCODE_S]){
 
-		_cam.moveX(-SPEEDVAR, deltaTime);
-	}
-	if(_kbstate[SDL_SCANCODE_D]){
+			_cam.moveZ(-SPEEDVAR, deltaTime);
+		}
 
-		_cam.moveX(SPEEDVAR, deltaTime);
-	}
+		//_camera X
+		if(_kbstate[SDL_SCANCODE_A]){
 
-	//_camera Y
-	if(_kbstate[SDL_SCANCODE_SPACE]){
+			_cam.moveX(-SPEEDVAR, deltaTime);
+		}
+		if(_kbstate[SDL_SCANCODE_D]){
 
-		_cam.moveY(-SPEEDVAR, deltaTime);
-	}
-	if(_kbstate[SDL_SCANCODE_LCTRL]){
+			_cam.moveX(SPEEDVAR, deltaTime);
+		}
 
-		_cam.moveY(SPEEDVAR, deltaTime);
-	}
-	
-	//camera fov
-	if(_kbstate[SDL_SCANCODE_MINUS] && (_cam.fov - FOVSPEED * deltaTime) > MINFOV){
-	
-		_cam.fov -= FOVSPEED * deltaTime;
-	}
-	if(_kbstate[SDL_SCANCODE_EQUALS]){
+		//_camera Y
+		if(_kbstate[SDL_SCANCODE_SPACE]){
 
-		_cam.fov += FOVSPEED * deltaTime;
-	}
-	
-	//camera tilt X
-	if(_kbstate[SDL_SCANCODE_UP]){
+			_cam.moveY(-SPEEDVAR, deltaTime);
+		}
+		if(_kbstate[SDL_SCANCODE_LCTRL]){
 
-		_cam.tiltX = _cam.tiltX + (CAMSPEED * deltaTime * (15 / _cam.fov)) > 1.57 ? 1.57 : _cam.tiltX + (CAMSPEED * deltaTime * (15 / _cam.fov));
-	}
-	if(_kbstate[SDL_SCANCODE_DOWN]){
+			_cam.moveY(SPEEDVAR, deltaTime);
+		}
+		
+		//camera fov
+		if(_kbstate[SDL_SCANCODE_MINUS] && (_cam.fov - FOVSPEED * deltaTime) > MINFOV){
+		
+			_cam.fov -= FOVSPEED * deltaTime;
+		}
+		if(_kbstate[SDL_SCANCODE_EQUALS]){
 
-		_cam.tiltX = _cam.tiltX - (CAMSPEED * deltaTime * (15 / _cam.fov)) < -1.57 ? -1.57 : _cam.tiltX - (CAMSPEED * deltaTime * (15 / _cam.fov));
-	}
+			_cam.fov += FOVSPEED * deltaTime;
+		}
+		
+		//camera tilt X
+		if(_kbstate[SDL_SCANCODE_UP]){
 
-	//camera tilt Y
-	//
-	//value is multiplied by 1500 / fov to make it adapt on distance
-	if(_kbstate[SDL_SCANCODE_LEFT]){
+			_cam.tiltX = _cam.tiltX + (CAMSPEED * deltaTime * (15 / _cam.fov)) > 1.57 ? 1.57 : _cam.tiltX + (CAMSPEED * deltaTime * (15 / _cam.fov));
+		}
+		if(_kbstate[SDL_SCANCODE_DOWN]){
 
-		_cam.tiltY = std::fmod(_cam.tiltY - (CAMSPEED * deltaTime * (15 / _cam.fov)), 2 * PI);
-	}
-	if(_kbstate[SDL_SCANCODE_RIGHT]){
+			_cam.tiltX = _cam.tiltX - (CAMSPEED * deltaTime * (15 / _cam.fov)) < -1.57 ? -1.57 : _cam.tiltX - (CAMSPEED * deltaTime * (15 / _cam.fov));
+		}
 
-		_cam.tiltY = std::fmod(_cam.tiltY + (CAMSPEED * deltaTime * (15 / _cam.fov)), 2 * PI);
+		//camera tilt Y
+		//
+		//value is multiplied by 1500 / fov to make it adapt on distance
+		if(_kbstate[SDL_SCANCODE_LEFT]){
+
+			_cam.tiltY = std::fmod(_cam.tiltY - (CAMSPEED * deltaTime * (15 / _cam.fov)), 2 * PI);
+		}
+		if(_kbstate[SDL_SCANCODE_RIGHT]){
+
+			_cam.tiltY = std::fmod(_cam.tiltY + (CAMSPEED * deltaTime * (15 / _cam.fov)), 2 * PI);
+		}
 	}
 }
 

@@ -30,9 +30,17 @@ textRenderer::~textRenderer(){
 	TTF_Quit();
 }
 
-void textRenderer::renderText(int x, int y, const std::string& text, SDL_Color color){ //
+void textRenderer::renderText(int x, int y, const std::string &text, SDL_Color color){ //
 
 	SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), color);
+
+	if(!surface){
+		//surface returns nullptr when the text is empty
+		//which happens witht he buffer from readInput() withtout
+		//this it segfaults
+		return;
+	}
+
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
 
 	SDL_Rect rect = {x, y, surface->w, surface->h}; //

@@ -4,7 +4,7 @@
 #define DEFAULTFOV 550
 #define SPEED 4000//100
 #define SPEEDSHIFTMOD 150
-#define FOVSPEED 200
+#define FOVSPEED 150
 #define CAMSPEED 2
 #define MOUSESENS 1
 #define MINFOV 50
