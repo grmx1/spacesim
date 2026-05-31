@@ -12,6 +12,15 @@
 #include "Input.hpp"
 #include "defines.hpp"
 
+//VERY IMPORTANT
+//i have to detach all the physics from the rendering process
+//that right now is joined most of the times making it impossible
+//to, now that i have made time scales accurate ( i think ) be able
+//to run a calculation loop multiple times in each frame without a
+//single SDL call and then push to the renderer and render all the updated
+//info once per frame
+//
+//im going to push the code before doing this to save the fixed scales
 double radToDeg(double radians);
 
 int main(int argc, char* argv[]){
@@ -44,6 +53,7 @@ int main(int argc, char* argv[]){
 	const std::chrono::duration<double> frameMaxExecTime(1.0 / FRAMECAP);
 	auto lastFrameTime = std::chrono::high_resolution_clock::now();
 	double deltaTime;
+	double deltaTimeMovement;
 
 	//fps counter
 	int frameCount = 0;
@@ -85,16 +95,15 @@ int main(int argc, char* argv[]){
 	//im using Horizon System to manually insert the information
 	//Time Specification: Start=2026-05-20 TDB , Stop=2026-06-19, Step=1 (days)
 	//                               |name       |x                        |y                       |z                      |mass     |radius   |velocity                                                                       |rotationAngVel 
-	astros.try_emplace("Sun",        "Sun",       0.00,                     0.00,                    0.00,                   1.989e30, 6.963e5,  vector3D{0.0, 0.0, 0.0}, 28.7e-3);
-	astros.try_emplace("Mercury",    "Mercury",   2.145434416716681E+06,    4.593395729676659E+07,   3.557100426719822E+06,  3.301e23, 2.440e3,  vector3D{-5.843295237937669E+01, 4.048711691994271E+00, 5.690193399634622E+00}, 12.4e-3);
-	astros.try_emplace("Venus",      "Venus",     -8.146172176991183E+07,   6.988637972774877E+07,   5.660433614479158E+06,  4.867e24, 6.052e3,  vector3D{-2.293501124201724E+01, -2.676065609340537E+01, 9.556759733306066E-01}, -2.99e-3);
-	astros.try_emplace("Earth",      "Earth",     -7.875500891135609E+07,   -1.292607154626929E+08,  7.900696970544755E+03,  5.972e24, 6.371e3,  vector3D{2.496813969720202E+01, -1.560876315415955E+01, 1.480191825459443E-03}, 727.2e-3);
-	astros.try_emplace("Mars",       "Mars",      2.062134692129982E+08,    3.819988844201361E+07,   -4.255964981759114E+06, 6.417e23, 3.390e3,  vector3D{-3.483059754828587E+00, 2.589529724627294E+01, 6.280865076797308E-01}, 708.8e-3);
-	astros.try_emplace("Jupiter",    "Jupiter",   -3.977215066838948E+08,   6.792281214587531E+08,   6.076947975619853E+06,  1.898e27, 6.991e4,  vector3D{-1.143663847930005E+01, -5.995741422124383E+00, 2.808607691996452E-01}, 1760.0e-3);
-	astros.try_emplace("Saturn",     "Saturn",    1.407927996180217E+09,    1.539996392108606E+08,   -5.872595060292597E+07, 5.683e26, 5.823e4,  vector3D{-1.589394387680512E+00, 9.579859441017856E+00, -1.038774658231327E-01}, 1630.0e-3);
-	astros.try_emplace("Uranus",     "Uranus",    1.406265257214856E+09,    2.549899181965824E+09,   -8.764036768092990E+06, 8.681e25, 2.536e4,  vector3D{-6.024687174531799E+00, 2.968845814764818E+00, 8.943727988440786E-02}, 1010.0e-3);
-	astros.try_emplace("Neptune",    "Neptune",   4.466629254293965E+09,    1.432568203818374E+08,   -1.058809943827548E+08, 1.024e26, 2.462e4,  vector3D{-2.198959283463029E-01, 5.462561967464699E+00, -1.076599005970522E-01}, 1080.0e-3);
-
+	astros.try_emplace("Sun",        "Sun",       0.00,                     0.00,                    0.00,                   1.989e30, 6.963e8,  vector3D{0.0, 0.0, 0.0}, 2.865e-6);
+	astros.try_emplace("Mercury",    "Mercury",   2.145434416716681E+09,    4.593395729676659E+10,   3.557100426719822E+09,  3.301e23, 2.440e6,  vector3D{-5.843295237937669E+04, 4.048711691994271E+03, 5.690193399634622E+03}, 1.240e-6);
+	astros.try_emplace("Venus",      "Venus",     -8.146172176991183E+10,   6.988637972774877E+10,   5.660433614479158E+09,  4.867e24, 6.052e6,  vector3D{-2.293501124201724E+04, -2.676065609340537E+04, 9.556759733306066E+02}, -2.992e-7);
+	astros.try_emplace("Earth",      "Earth",     -7.875500891135609E+10,   -1.292607154626929E+11,  7.900696970544755E+06,  5.972e24, 6.371e6,  vector3D{2.496813969720202E+04, -1.560876315415955E+04, 1.480191825459443E-00}, 7.292e-5);
+	astros.try_emplace("Mars",       "Mars",      2.062134692129982E+11,    3.819988844201361E+10,   -4.255964981759114E+09, 6.417e23, 3.390e6,  vector3D{-3.483059754828587E+03, 2.589529724627294E+04, 6.280865076797308E+02}, 7.088e-5);
+	astros.try_emplace("Jupiter",    "Jupiter",   -3.977215066838948E+11,   6.792281214587531E+11,   6.076947975619853E+09,  1.898e27, 6.991e7,  vector3D{-1.143663847930005E+04, -5.995741422124383E+03, 2.808607691996452E+02}, 1.758e-4);
+	astros.try_emplace("Saturn",     "Saturn",    1.407927996180217E+12,    1.539996392108606E+11,   -5.872595060292597E+10, 5.683e26, 5.823e7,  vector3D{-1.589394387680512E+03, 9.579859441017856E+03, -1.038774658231327E+02}, 1.638e-4);
+	astros.try_emplace("Uranus",     "Uranus",    1.406265257214856E+12,    2.549899181965824E+12,   -8.764036768092990E+09, 8.681e25, 2.536e7,  vector3D{-6.024687174531799E+03, 2.968845814764818E+03, 8.943727988440786E+01}, -1.012e-4);
+	astros.try_emplace("Neptune",    "Neptune",   4.466629254293965E+12,    1.432568203818374E+11,   -1.058809943827548E+11, 1.024e26, 2.462e7,  vector3D{-2.198959283463029E-04, 5.462561967464699E+03, -1.076599005970522E+02}, 1.080e-4);
 
 	for(auto &astro : astros){
 
@@ -130,8 +139,8 @@ int main(int argc, char* argv[]){
 		std::chrono::duration<double> duration = beginFrameTime - lastFrameTime;
 	
 		//calculate delta time
-		deltaTime = duration.count() * 60 * 1000;
-		if(deltaTime > 0.1f * 60) deltaTime = 0.1f * 60; //10 fps cap so lag doesnt send camera flying
+		deltaTime = duration.count();
+		deltaTimeMovement = deltaTime * 1000;
 	
 		//fps counter
 		frameCount++;
@@ -196,26 +205,11 @@ int main(int argc, char* argv[]){
 
 			//so->orbitY(0.01 * deltaTime);
 
+			//bruh i need to set this as a function inside spaceObject or something not in here lmao
 			//for some reason when using decoy i see no traces ill have to look into it
 			if(parser.flags.traces){
 
-				if(so->renderCycles >= TRACEUPDATERATE){
-
-					if(so->trace.size() > MAXTRACESIZE){
-
-						so->trace.pop_front();
-					}
-					so->trace.push_back({so->posX, so->posY, so->posZ});
-					so->renderCycles = 0;
-				}
-				else{
-
-					so->renderCycles++;
-				}
-			}
-			else if(!so->trace.empty()){
-			
-				so->trace.clear();
+				so->handleTrace(cameras[cidx], parser.flags.forwardTraces, deltaTime);
 			}
 
 			if(parser.flags.isCamDecoy){
@@ -238,10 +232,10 @@ int main(int argc, char* argv[]){
 		static bool lastMouseState = !parser.flags.mouseDisabled;
 
 
-		handleKeyboardInput(&events, kbstate, cameras[cidx], deltaTime, parser.flags.mouseDisabled, menus);
+		handleKeyboardInput(&events, kbstate, cameras[cidx], deltaTimeMovement, parser.flags.mouseDisabled, menus);
 		while(SDL_PollEvent(&events)){
 
-			handleMouseInput(&events, cameras[cidx], deltaTime, parser.flags.mouseDisabled, menus);
+			handleMouseInput(&events, cameras[cidx], deltaTimeMovement, parser.flags.mouseDisabled, menus);
 		}
 
 		Uint32 flags = SDL_GetWindowFlags(window);

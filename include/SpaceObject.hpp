@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
+#include <array>
 #include <map>
 #include <cmath>
 #include <list>
@@ -15,7 +16,7 @@ class SpaceObject;
 
 const double PI = M_PI;
 const double HALF_PI = M_PI / 2;
-const double GKM = 6.6743e-20;
+const double G = 6.6743e-11;
 double map(double value, double f1, double l1, double f2, double l2);
 
 class Camera;
@@ -28,9 +29,9 @@ struct vector3D{
 //position
 struct point3D{
 
+	int screenX, screenY;
 	double x, y, z;
 	double rX, rY, rZ; //rotated X Y Z
-	double screenX, screenY;
 	bool onScreen;
 
 	void project(Camera &_cam, double _posX, double _posY, double _posZ);
@@ -50,7 +51,7 @@ class Camera{
 	double posX, posY, posZ;
 	double tiltX, tiltY, tiltZ;
 
-	Camera(double _posX = -8e8, double _posY = -5e8, double _posZ = -3e8, double _fov = DEFAULTFOV, double _tiltX = -0.5, double _tiltY = 1.3, double _tiltZ = 0);
+	Camera(double _posX = -8e11, double _posY = -5e11, double _posZ = -3e11, double _fov = DEFAULTFOV, double _tiltX = -0.5, double _tiltY = 1.3, double _tiltZ = 0);
 
 	void lockToSO(SpaceObject &so);
 	void moveX(double speed, float deltaT);
@@ -82,7 +83,10 @@ class SpaceObject{
 	double posX, posY, posZ;
 
 	std::vector<point3D> points;
-	std::list<point3D> trace;
+	std::array<point3D, MAXTRACESIZE> trace;
+	std::array<SDL_Point, MAXTRACESIZE> traceSDL;
+	int traceHead;
+	int traceFull;
 
 	struct {
 
@@ -109,6 +113,8 @@ class SpaceObject{
 
 	void calcObjRes(Camera &_cam);
 	void plot();
+
+	void handleTrace(Camera &_cam, bool forward, double deltaT);
 
 	//display
 	void render(SDL_Renderer* renderer, textRenderer* _txtRenderer, bool renderLabels, Camera &_cam, bool forward = false);

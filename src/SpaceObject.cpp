@@ -101,14 +101,14 @@ void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astr
 			double unitVy = yDist / totalDist;
 			double unitVz = zDist / totalDist;
 
-			double halfGrav = (GKM* so.mass) / std::pow(totalDist, 2);
+			double grav = (G * so.mass) / std::pow(totalDist, 2);
 
-			double localFx = halfGrav * unitVx;
-			double localFy = halfGrav * unitVy;
-			double localFz = halfGrav * unitVz;
+			double localFx = grav * unitVx;
+			double localFy = grav * unitVy;
+			double localFz = grav * unitVz;
 
 			//double totalAcc = std::sqrt(std::pow(localFx, 2) + std::pow(localFy, 2) + std::pow(localFz, 2));
-
+			
 			Fx += localFx;
 			Fy += localFy;
 			Fz += localFz;
@@ -122,16 +122,16 @@ void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astr
 
 void SpaceObject::updateVelocity(double deltaT){
 	
-	velocity.x += acceleration.x * deltaT * TIMEMODIFIER;
-	velocity.y += acceleration.y * deltaT * TIMEMODIFIER;
-	velocity.z += acceleration.z * deltaT * TIMEMODIFIER;
+	velocity.x += acceleration.x * deltaT;// * TIMEMODIFIER;
+	velocity.y += acceleration.y * deltaT;// * TIMEMODIFIER;
+	velocity.z += acceleration.z * deltaT;// * TIMEMODIFIER;
 }
 
 void SpaceObject::updatePosition(double deltaT){
 
-	posX += velocity.x * deltaT * TIMEMODIFIER;
-	posY += velocity.y * deltaT * TIMEMODIFIER;
-	posZ += velocity.z * deltaT * TIMEMODIFIER;
+	posX += velocity.x * deltaT;// * TIMEMODIFIER;
+	posY += velocity.y * deltaT;// * TIMEMODIFIER;
+	posZ += velocity.z * deltaT;// * TIMEMODIFIER;
 }
 
 void SpaceObject::orbitX(double theta){
@@ -338,18 +338,44 @@ void SpaceObject::calcObjRes(Camera &_cam){
 }
 */
 
-void SpaceObject::project(Camera &_cam){
+void SpaceObject::handleTrace(Camera &_cam, bool forward, double deltaT){
+
+	//also i should make this dynamic depending on the orbit or speed of the planet it does not make sense that 
+	//neptune has the same trace size and update rate as mercury
+	if(renderCycles >= TRACEUPDATERATE){
+
+		trace[traceHead++] = point3D{0, 0, posX, posY, posZ};
+		renderCycles = 0;
+
+		if(traceHead >= MAXTRACESIZE){
+
+			traceHead = 0;
+			traceFull = true;
+		}
+
+	}
+	else{
+
+		renderCycles++;
+	}
 
 	//draw trace
-	if(!trace.empty()){
+	if(traceHead > 0 || traceFull){
 	
-		std::list<point3D>::iterator it;
+		for(int i = 0; i < trace.size(); i++){
 
-		for(it = trace.begin(); it != trace.end(); it++){
-
-			it->project(_cam, 0, 0, 0);
+			if(forward){
+				
+				trace[i].z += 2.3e+05 * deltaT;
+			}
+			trace[i].project(_cam, 0, 0, 0);
+			traceSDL[i].x = trace[i].screenX;
+			traceSDL[i].y = trace[i].screenY;
 		}
 	}
+}
+
+void SpaceObject::project(Camera &_cam){
 
 	for(int i = 0; i < points.size(); i++){
 
@@ -430,23 +456,19 @@ void SpaceObject::project(Camera &_cam, Camera &_decoy){
 void SpaceObject::render(SDL_Renderer* renderer, textRenderer* _txtRenderer, bool renderLabels, Camera &_cam, bool forward){
 
 	//draw trace
-	if(!trace.empty()){
-	
-		std::list<point3D>::iterator it;
+	if(traceHead > 1 || traceFull){
 
-		for(it = trace.begin(); std::next(it) != trace.end(); it++){
+		if(!traceFull){
 
-			std::list<point3D>::iterator next = std::next(it);
+			SDL_RenderDrawLines(renderer, &traceSDL[0], traceHead);
+		}
+		else{
 
-			if((it->screenX > 0 && it->screenX < RES[0] && it->screenY > 0 && it->screenY < RES[1])
-				&& (next->screenX > 0 && next->screenX < RES[0] && next->screenY > 0 && next->screenY < RES[1])){
+			SDL_RenderDrawLines(renderer, &traceSDL[traceHead], MAXTRACESIZE - traceHead);
 
-				//SDL_RenderDrawPoint(renderer, trace[i].screenX, trace[i].screenY);
-				SDL_RenderDrawLine(renderer, it->screenX, it->screenY, next->screenX, next->screenY);
-			}
-			if(forward){
+			if(traceHead > 0){
 
-				it->z += TIMEMODIFIER * 1000;
+				SDL_RenderDrawLines(renderer, &traceSDL[0], traceHead);
 			}
 		}
 	}
@@ -525,7 +547,7 @@ void SpaceObject::plot(){
 			float y = radius * sinLon * sinLat;
 			float z = radius * cosLon;
 
-			points.push_back({x, y, z, 0, 0});
+			points.push_back({0, 0, x, y, z, 0, 0});
 		}
 	}
 
@@ -542,7 +564,7 @@ void SpaceObject::projectRenderPts(SDL_Renderer* renderer, Camera &_cam){
 	}
 }
 
-SpaceObject::SpaceObject(std::string _name, double _x, double _y, double _z, double _mass, double _radius, vector3D initVelocity, double _angVelocityRotation){
+SpaceObject::SpaceObject(std::string _name, double _x, double _y, double _z, double _mass, double _radius, vector3D initVelocity, double _angVelocityRotation) : trace{0} {
 
 	name = _name;
 
@@ -554,6 +576,8 @@ SpaceObject::SpaceObject(std::string _name, double _x, double _y, double _z, dou
 	radius = _radius;
 
 	rotation = 0;
+	traceHead = 0;
+	traceFull = false;
 
 	velocity.x = initVelocity.x;
 	velocity.y = initVelocity.y;
