@@ -78,13 +78,13 @@ void starsBackground::render(SDL_Renderer* renderer, const Camera &_cam){
 	}
 }
 
-void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astros){
+void SpaceObject::calculateForces(const std::unordered_map<std::string, SpaceObject> &astros){
 
 	double Fx = 0;
 	double Fy = 0;
 	double Fz = 0;
 
-	for(const auto astro : astros){
+	for(const auto &astro : astros){
 
 		const SpaceObject &so = astro.second;
 
@@ -95,13 +95,13 @@ void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astr
 			double yDist = so.posY - posY;
 			double zDist = so.posZ - posZ;
 
-			double totalDist = std::sqrt(std::pow(xDist, 2) + std::pow(yDist, 2) + std::pow(zDist, 2));
+			double totalDist = std::sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
 
-			double unitVx = xDist / totalDist;
-			double unitVy = yDist / totalDist;
-			double unitVz = zDist / totalDist;
+			double unitVx = xDist;
+			double unitVy = yDist;
+			double unitVz = zDist;
 
-			double grav = (G * so.mass) / std::pow(totalDist, 2);
+			double grav = (G * so.mass) / (totalDist * totalDist * totalDist);
 
 			double localFx = grav * unitVx;
 			double localFy = grav * unitVy;
@@ -109,9 +109,9 @@ void SpaceObject::calculateForces(const std::map<std::string, SpaceObject> &astr
 
 			//double totalAcc = std::sqrt(std::pow(localFx, 2) + std::pow(localFy, 2) + std::pow(localFz, 2));
 			
-			Fx += localFx;
-			Fy += localFy;
-			Fz += localFz;
+			Fx += grav * xDist;
+			Fy += grav * yDist;
+			Fz += grav * zDist;
 		}
 	}
 

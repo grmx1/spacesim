@@ -3,7 +3,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <vector>
 #include <array>
-#include <map>
+#include <unordered_map>
 #include <cmath>
 #include <list>
 
@@ -127,7 +127,7 @@ class SpaceObject{
 	void rotateY(double theta);
 	void rotateZ(double theta);
 
-	void calculateForces(const std::map<std::string, SpaceObject> &astros);
+	void calculateForces(const std::unordered_map<std::string, SpaceObject> &astros);
 
 	void updateVelocity(double deltaT);
 	void updatePosition(double deltaT);

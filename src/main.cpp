@@ -3,6 +3,7 @@
 #include <numbers>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <cstdlib>
 #include <chrono>
 #include <thread> //for fps rating not multithreading
@@ -90,7 +91,7 @@ int main(int argc, char* argv[]){
 	std::vector<Menu*> menus;
 	std::vector<std::pair<std::string, double*>> vars;
 
-	std::map<std::string, SpaceObject> astros;
+	std::unordered_map<std::string, SpaceObject> astros;
 
 	//im using Horizon System to manually insert the information
 	//Time Specification: Start=2026-05-20 TDB , Stop=2026-06-19, Step=1 (days)
@@ -164,10 +165,28 @@ int main(int argc, char* argv[]){
 
 			mainLoop = false;
 		}
+
+		//space objects CALC loop
+		for(int i = 0; i < TIMEMODIFIER; i++){
+			
+			for(auto &astro : astros){
+
+				SpaceObject* so = &astro.second;
+
+				so->rotation = std::fmod(so->rotation + (so->angVelocityRotation * deltaTime), 2 * PI);
+
+				if(so->name != "CAMERA"){
+
+					so->rotateZ(so->angVelocityRotation * deltaTime);
+
+					so->calculateForces(astros);
+					so->updateVelocity(deltaTime);
+					so->updatePosition(deltaTime);
+				}
+			}
+		}
 	
-		bg.render(renderer, cameras[cidx]);
-	
-		//space objects loop
+		//space objects RENDER loop
 		for(auto &astro : astros){
 
 			SpaceObject* so = &astro.second;
@@ -188,16 +207,6 @@ int main(int argc, char* argv[]){
 				so->plot();
 			}
 
-			so->rotation = std::fmod(so->rotation + (so->angVelocityRotation * deltaTime), 2 * PI);
-
-			if(so->name != "CAMERA"){
-
-				so->rotateZ(so->angVelocityRotation * deltaTime);
-
-				so->calculateForces(astros);
-				so->updateVelocity(deltaTime);
-				so->updatePosition(deltaTime);
-			}
 			if(parser.flags.lock && astros.find(parser.flags.lockname) != astros.end()){
 
 				cameras[cidx].lockToSO(astros.at(parser.flags.lockname));
@@ -231,7 +240,6 @@ int main(int argc, char* argv[]){
 
 		static bool lastMouseState = !parser.flags.mouseDisabled;
 
-
 		handleKeyboardInput(&events, kbstate, cameras[cidx], deltaTimeMovement, parser.flags.mouseDisabled, menus);
 		while(SDL_PollEvent(&events)){
 
@@ -263,6 +271,8 @@ int main(int argc, char* argv[]){
 
 			lastMouseState = false;
 		}
+
+		bg.render(renderer, cameras[cidx]);
 
 		if(mmenu.show){
 
