@@ -1,4 +1,4 @@
-# 📦 SpaceSim
+# 🚀: SpaceSim
 
 > On development Solar System sized physics simulator to predict and visualize orbits and planetary interaction.
 
@@ -8,7 +8,7 @@
 
 - Gravity based interaction between space objects.
 - Custom 3D rendering and optimizations based on SDL2
-- 
+  
 <img width="1023" height="779" alt="spacesim2" src="https://github.com/user-attachments/assets/df85b20e-f313-46d8-a2e7-40f1938e62b6" />
 
 ## ℹ️ Overview
@@ -30,11 +30,13 @@ Also by pressing "m" a menu will pop up to modify each space object's mass
 
 Debian / Ubuntu
 ```bash
+git clone https://github.com/grmx1/spacesim.git
 sudo apt install cmake libsdl2-dev libsdl2-ttf-dev build-essential
 ```
 
 Arch
 ```bash
+git clone https://github.com/grmx1/spacesim.git
 sudo pacman -Syu --needed cmake sdl2 sdl2_ttf base-devel
 ```
 
